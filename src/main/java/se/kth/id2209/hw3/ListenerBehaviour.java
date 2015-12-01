@@ -39,6 +39,10 @@ public class ListenerBehaviour extends CyclicBehaviour {
             return;
         }
 
+        if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+            agent.gotPos = true;
+        }
+        
         if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL || 
                 msg.getOntology().equalsIgnoreCase(Ontologies.ACCEPTED_PROPOSAL)) {
             try {
@@ -64,8 +68,13 @@ public class ListenerBehaviour extends CyclicBehaviour {
                     + " from " + msg.getSender().getLocalName() + ". GotPos="
                     + agent.gotPos);
             
-            ACLMessage reply = msg.createReply();
-
+            ACLMessage reply = new ACLMessage();
+            reply.addReceiver(msg.getSender());
+            try {
+                reply.setContentObject(pos);
+            } catch (IOException ex) {
+                Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
+            }
             if (!agent.gotPos) {
                 reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                 reply.setOntology(Ontologies.NOT_READY_FOR_PROPOSAL);
@@ -74,7 +83,7 @@ public class ListenerBehaviour extends CyclicBehaviour {
                 reply.setOntology(Ontologies.POSITION_COLLIDING);
             } else {
                 reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                
+                reply.setOntology(Ontologies.ACCEPTED_PROPOSAL);
                 agent.addBehaviour(new OneShotBehaviour() {
 
                     @Override
@@ -93,8 +102,11 @@ public class ListenerBehaviour extends CyclicBehaviour {
                     }
                 });
             }
-            agent.send(msg);
+            agent.send(reply);
         } else if (msg.getOntology().equalsIgnoreCase(Ontologies.NOT_READY_FOR_PROPOSAL)) {
+            
+            System.out.println(agent.getLocalName() + " received NOT READY");
+            
             int[] pos = null;
             try {
                 pos = (int[]) msg.getContentObject();
@@ -113,6 +125,7 @@ public class ListenerBehaviour extends CyclicBehaviour {
                 }
             });
         } else if (msg.getOntology().equalsIgnoreCase(Ontologies.POSITION_COLLIDING)) {
+            System.out.println(agent.getLocalName() + " received POSITION_COLLIDING");
             agent.addBehaviour(new ProposePositionBehaviour(agent));
         }
     }

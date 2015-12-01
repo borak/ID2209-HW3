@@ -41,7 +41,7 @@ public class QueenAgent extends Agent {
                     board[pos[0]][pos[1]] = ID;
                     gotPos = true;
                 } else {
-                    predecessor = getPredecessor (queens); //queens[ID - 2];
+                    predecessor = getPredecessor (queens); 
                     System.out.println(QueenAgent.this.getAID().getLocalName() + " pred="+predecessor.getLocalName());
                     addBehaviour(new ProposePositionBehaviour(QueenAgent.this));
                 }
@@ -81,6 +81,7 @@ public class QueenAgent extends Agent {
 
     // NOT TESTED
     boolean isColliding(int[] pos) {
+        System.out.println("Comparing to pos="+pos[0]+","+pos[1]);
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if(board[i][j] != 0) {
