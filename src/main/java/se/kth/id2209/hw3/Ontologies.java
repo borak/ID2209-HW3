@@ -9,4 +9,5 @@ public class Ontologies {
     public final static String PROPOSE_POSITION = "propose position";
     public final static String NOT_READY_FOR_PROPOSAL = "not ready for proposal";
     public final static String POSITION_COLLIDING = "pos colliding";
+    public final static String ACCEPTED_PROPOSAL = "accepted prop";
 }

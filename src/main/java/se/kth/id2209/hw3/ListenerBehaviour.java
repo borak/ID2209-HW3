@@ -3,10 +3,12 @@ package se.kth.id2209.hw3;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.proto.ProposeInitiator;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +26,12 @@ public class ListenerBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
-        ACLMessage msg = myAgent.receive();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        final ACLMessage msg = myAgent.receive();
         final QueenAgent agent = ((QueenAgent) myAgent);
 
         if (msg == null) {
@@ -32,9 +39,13 @@ public class ListenerBehaviour extends CyclicBehaviour {
             return;
         }
 
-        if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+        if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL || 
+                msg.getOntology().equalsIgnoreCase(Ontologies.ACCEPTED_PROPOSAL)) {
             try {
-                agent.addPos((int[]) msg.getContentObject(), msg.getSender());
+                int[] pos = (int[]) msg.getContentObject();
+                System.out.println(agent.getLocalName() + ": adding pos=" 
+                        + pos);
+                agent.addPos(pos, msg.getSender());
             } catch (UnreadableException ex) {
                 Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
                 block();
@@ -49,6 +60,10 @@ public class ListenerBehaviour extends CyclicBehaviour {
                 return;
             }
 
+            System.out.println(agent.getLocalName() + ": got pos=" + pos 
+                    + " from " + msg.getSender().getLocalName() + ". GotPos="
+                    + agent.gotPos);
+            
             ACLMessage reply = msg.createReply();
 
             if (!agent.gotPos) {
@@ -59,9 +74,24 @@ public class ListenerBehaviour extends CyclicBehaviour {
                 reply.setOntology(Ontologies.POSITION_COLLIDING);
             } else {
                 reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                for (AID aid : agent.queens) {
-                    reply.addReceiver(aid);
-                }
+                
+                agent.addBehaviour(new OneShotBehaviour() {
+
+                    @Override
+                    public void action() {
+                        ACLMessage informMsg = new ACLMessage(ACLMessage.INFORM);
+                        informMsg.setOntology(Ontologies.ACCEPTED_PROPOSAL);
+                        for (AID aid : agent.queens) {
+                            informMsg.addReceiver(aid);
+                        }
+                        try {
+                            informMsg.setContentObject(msg.getContentObject());
+                        } catch (IOException | UnreadableException ex) {
+                            Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        agent.send(informMsg);
+                    }
+                });
             }
             agent.send(msg);
         } else if (msg.getOntology().equalsIgnoreCase(Ontologies.NOT_READY_FOR_PROPOSAL)) {
