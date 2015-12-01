@@ -5,6 +5,7 @@ import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -95,7 +96,14 @@ public class QueenAgent extends Agent {
             for (int j = 0; j < N; j++) {
                 if(board[i][j] == 0) {
                     // Straight
-                    if(i == pos[0] || j == pos[1]) {
+                    int rowSum = 0;
+                    int columnSum = 0;
+                    for (int n : board[pos[1]])
+                        rowSum += n;
+                    for(int n=0; n<board[0].length; n++ )
+                        columnSum += board[n][pos[0]];
+
+                    if(rowSum > 0 || columnSum > 0) {
                         System.out.println("Straight: i="+i+",j="+j);
                         continue;
                     }
