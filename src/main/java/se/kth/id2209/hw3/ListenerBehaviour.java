@@ -75,7 +75,7 @@ public class ListenerBehaviour extends CyclicBehaviour {
                 return;
             }
 
-            System.out.println(agent.getLocalName() + ": got pos=" + pos 
+            System.out.println(agent.getLocalName() + ": got pos=" + pos[0] + ", " + pos[1]
                     + " from " + msg.getSender().getLocalName() + ". GotPos="
                     + agent.gotPos);
             
