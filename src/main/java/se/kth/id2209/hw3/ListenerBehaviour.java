@@ -59,7 +59,7 @@ public class ListenerBehaviour extends CyclicBehaviour {
             try {
                 int[] pos = (int[]) msg.getContentObject();
                 System.out.println(agent.getLocalName() + ": adding pos=" 
-                        + pos);
+                        + pos[0] + ", " + pos[1]);
                 agent.addPos(pos, msg.getSender());
             } catch (UnreadableException ex) {
                 Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
