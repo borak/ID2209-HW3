@@ -26,11 +26,11 @@ public class ListenerBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
-        try {
+        /*try {
             Thread.sleep(500);
         } catch (InterruptedException ex) {
             Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
         final ACLMessage msg = myAgent.receive();
         final QueenAgent agent = ((QueenAgent) myAgent);
 
@@ -40,7 +40,18 @@ public class ListenerBehaviour extends CyclicBehaviour {
         }
 
         if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+            
+            int[] pos = null;
+            try {
+                pos = (int[]) msg.getContentObject();
+            } catch (UnreadableException ex) {
+                Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
+                block();
+                return;
+            }
+            
             agent.gotPos = true;
+            agent.myPos = pos;
         }
         
         if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL || 

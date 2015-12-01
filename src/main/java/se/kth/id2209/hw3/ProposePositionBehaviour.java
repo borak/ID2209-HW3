@@ -17,6 +17,12 @@ public class ProposePositionBehaviour extends OneShotBehaviour {
     public ProposePositionBehaviour(QueenAgent agent) {
         super(agent);
         pos = agent.generateRandomPosition();
+        //pos = agent.getNonCollidingPos();
+        if(pos == null) {
+            System.out.println("ProposePositionBehaviour - pos=null");
+        } else {
+            System.out.println("ProposePositionBehaviour - pos="+pos[0]+","+pos[1]);
+        }
     }
     
     public ProposePositionBehaviour(QueenAgent agent, int[] pos) {

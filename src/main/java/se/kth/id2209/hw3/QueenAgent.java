@@ -21,6 +21,7 @@ public class QueenAgent extends Agent {
     int[][] board = null;
     private Random random = new Random();
     boolean gotPos = false;
+    int[] myPos = null;
 
     @Override
     public void setup() {
@@ -40,6 +41,10 @@ public class QueenAgent extends Agent {
                     int[] pos = generateRandomPosition();
                     board[pos[0]][pos[1]] = ID;
                     gotPos = true;
+                    myPos = pos;
+                    printBoard();
+                    int[] cpos = getANonCollidingPos();
+                    System.out.println("CPOS = "+ cpos[0]+","+cpos[1]);
                 } else {
                     predecessor = getPredecessor (queens); 
                     System.out.println(QueenAgent.this.getAID().getLocalName() + " pred="+predecessor.getLocalName());
@@ -81,10 +86,14 @@ public class QueenAgent extends Agent {
 
     // NOT TESTED
     boolean isColliding(int[] pos) {
+        if(pos == null) {
+            System.out.println("Comparing to pos=null");
+            return true;
+        }
         System.out.println("Comparing to pos="+pos[0]+","+pos[1]);
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if(board[i][j] != 0) {
+                if(board[i][j] == 0) {
                     // Same pos
                     if(i == pos[0] && j == pos[1]) {
                         System.out.println("Same pos: i="+i+",j="+j);
@@ -93,7 +102,7 @@ public class QueenAgent extends Agent {
                     //Check straight left/right & up/down
                     for (int h = 1; h < N; h++) {
                         if(i+h == pos[0]) {
-                            System.out.println("Straight1: i="+i+",j="+j);
+                            System.out.println("Straight1: i="+i+",j="+j + " colliding with " + i+h + "," +pos[0]);
                             return true;
                         } else if(i-h == pos[0]) {
                             System.out.println("Straight2: i="+i+",j="+j);
@@ -128,9 +137,69 @@ public class QueenAgent extends Agent {
         }
         return false;
     }
+    
+    int[] getANonCollidingPos() {
+        int[] pos = new int[2];
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if(board[i][j] == 0) {
+                    pos[0] = i;
+                    pos[1] = j;
+                    
+                    //Check straight left/right & up/down
+                    boolean shouldContinue = false;
+                    for (int h = 1; h < N; h++) {
+                        if(i+h == pos[0] || i-h == pos[0]
+                                || j+h == pos[1] ||j-h == pos[1]) {
+                            shouldContinue = true;
+                        }
+                    }
+                    if(shouldContinue) {
+                        System.out.println("getNonCollidingPos Straight: i="+i+",j="+j);
+                        continue;
+                    }
+                    
+                    // Check diagonal in all four directions
+                    for (int h = 1; h < N - Math.max(i, j); h++) {
+                        if(i+h == pos[0] && j+h == pos[1]) {
+                            shouldContinue = true;
+                        } else if(i-h == pos[0] && j-h == pos[1]) {
+                            shouldContinue = true;
+                        } else if(i-h == pos[0] && j+h == pos[1]) {
+                            shouldContinue = true;
+                        } else if(i+h == pos[0] && j-h == pos[1]) {
+                            shouldContinue = true;
+                        }
+                    }
+                    if(shouldContinue) {
+                        System.out.println("getNonCollidingPos Diagonal: i="+i+",j="+j);
+                        continue;
+                    }
+                    
+                    return pos;
+                }
+            }
+        }
+        return null;
+    }
 
     void addPos(int[] pos, AID aid) {
         board[pos[0]][pos[1]] = Integer.parseInt(
                 aid.getLocalName().substring("Queen".length()));
+        printBoard();
+    }
+    
+    void printBoard() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("---------------------------------------------");
+        sb.append("\n");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                sb.append(board[i][j] + " ");
+            }
+            sb.append("\n");
+        }
+        sb.append("---------------------------------------------");
+        System.out.println(sb.toString());
     }
 }
