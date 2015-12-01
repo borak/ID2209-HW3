@@ -94,48 +94,34 @@ public class QueenAgent extends Agent {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if(board[i][j] == 0) {
-                    // Same pos
-                    if(i == pos[0] && j == pos[1]) {
-                        System.out.println("Same pos: i="+i+",j="+j);
-                        return true;
+                    // Straight
+                    if(i == pos[0] || j == pos[1]) {
+                        System.out.println("Straight: i="+i+",j="+j);
+                        continue;
                     }
-                    //Check straight left/right & up/down
-                    for (int h = 1; h < N; h++) {
-                        if(i+h == pos[0]) {
-                            System.out.println("Straight1: i="+i+",j="+j + " colliding with " + i+h + "," +pos[0]);
-                            return true;
-                        } else if(i-h == pos[0]) {
-                            System.out.println("Straight2: i="+i+",j="+j);
-                            return true;
-                        } else if(j+h == pos[1]) {
-                            System.out.println("Straight3: i="+i+",j="+j);
-                            return true;
-                        } else if(j-h == pos[1]) {
-                            System.out.println("Straight4: i="+i+",j="+j);
-                            return true;
-                        }
-                    }
+                    boolean shouldContinue = false;
                     
                     // Check diagonal in all four directions
                     for (int h = 1; h < N - Math.max(i, j); h++) {
                         if(i+h == pos[0] && j+h == pos[1]) {
-                            System.out.println("Diagonal1: i="+i+",j="+j);
-                            return true;
+                            shouldContinue = true;
                         } else if(i-h == pos[0] && j-h == pos[1]) {
-                            System.out.println("Diagonal2: i="+i+",j="+j);
-                            return true;
+                            shouldContinue = true;
                         } else if(i-h == pos[0] && j+h == pos[1]) {
-                            System.out.println("Diagonal3: i="+i+",j="+j);
-                            return true;
+                            shouldContinue = true;
                         } else if(i+h == pos[0] && j-h == pos[1]) {
-                            System.out.println("Diagonal4: i="+i+",j="+j);
-                            return true;
+                            shouldContinue = true;
                         }
                     }
+                    if(shouldContinue) {
+                        System.out.println("isColliding Diagonal: i="+i+",j="+j);
+                        continue;
+                    }
+                    return false;
                 }
             }
         }
-        return false;
+        return true;
     }
     
     int[] getANonCollidingPos() {
@@ -146,18 +132,13 @@ public class QueenAgent extends Agent {
                     pos[0] = i;
                     pos[1] = j;
                     
-                    //Check straight left/right & up/down
                     boolean shouldContinue = false;
-                    for (int h = 1; h < N; h++) {
-                        if(i+h == pos[0] || i-h == pos[0]
-                                || j+h == pos[1] ||j-h == pos[1]) {
-                            shouldContinue = true;
-                        }
-                    }
-                    if(shouldContinue) {
-                        System.out.println("getNonCollidingPos Straight: i="+i+",j="+j);
+                    
+                    //Check straight left/right & up/down
+                    /*if(i == pos[0] || j == pos[1]) {
+                        System.out.println("getANonCollidingPos Straight: i="+i+",j="+j);
                         continue;
-                    }
+                    }*/
                     
                     // Check diagonal in all four directions
                     for (int h = 1; h < N - Math.max(i, j); h++) {
