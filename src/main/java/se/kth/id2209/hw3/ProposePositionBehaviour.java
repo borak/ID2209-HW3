@@ -12,8 +12,16 @@ import java.util.logging.Logger;
  */
 public class ProposePositionBehaviour extends OneShotBehaviour {
 
+    private int[] pos = null;
+    
     public ProposePositionBehaviour(QueenAgent agent) {
         super(agent);
+        pos = agent.generateRandomPosition();
+    }
+    
+    public ProposePositionBehaviour(QueenAgent agent, int[] pos) {
+        super(agent);
+        this.pos = pos;
     }
     
     @Override
@@ -24,7 +32,6 @@ public class ProposePositionBehaviour extends OneShotBehaviour {
         msg.setOntology(Ontologies.PROPOSE_POSITION);
         msg.addReceiver(agent.predecessor);
         
-        int[] pos = agent.generateRandomPosition();
         try {
             msg.setContentObject(pos);
         } catch (IOException ex) {

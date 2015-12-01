@@ -3,8 +3,10 @@ package se.kth.id2209.hw3;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+import jade.proto.ProposeInitiator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +16,8 @@ import java.util.logging.Logger;
  */
 public class ListenerBehaviour extends CyclicBehaviour {
 
+    private final static int RESEND_PROPOSAL_DELAY = 1000;
+    
     ListenerBehaviour(QueenAgent agent) {
         super(agent);
     }
@@ -21,7 +25,7 @@ public class ListenerBehaviour extends CyclicBehaviour {
     @Override
     public void action() {
         ACLMessage msg = myAgent.receive();
-        QueenAgent agent = ((QueenAgent) myAgent);
+        final QueenAgent agent = ((QueenAgent) myAgent);
 
         if (msg == null) {
             block();
@@ -61,9 +65,25 @@ public class ListenerBehaviour extends CyclicBehaviour {
             }
             agent.send(msg);
         } else if (msg.getOntology().equalsIgnoreCase(Ontologies.NOT_READY_FOR_PROPOSAL)) {
-
+            int[] pos = null;
+            try {
+                pos = (int[]) msg.getContentObject();
+            } catch (UnreadableException ex) {
+                Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
+                agent.addBehaviour(new ProposePositionBehaviour(agent));
+                block();
+                return;
+            }
+            
+            final int[] finalpos = pos;
+            agent.addBehaviour(new WakerBehaviour(myAgent, RESEND_PROPOSAL_DELAY) {
+                @Override
+                public void onWake() {
+                    agent.addBehaviour(new ProposePositionBehaviour(agent, finalpos));
+                }
+            });
         } else if (msg.getOntology().equalsIgnoreCase(Ontologies.POSITION_COLLIDING)) {
-
+            agent.addBehaviour(new ProposePositionBehaviour(agent));
         }
     }
 
