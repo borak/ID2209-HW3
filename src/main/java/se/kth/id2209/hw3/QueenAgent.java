@@ -92,21 +92,26 @@ public class QueenAgent extends Agent {
             return true;
         }
         System.out.println("Comparing to pos="+pos[0]+","+pos[1]);
+
+        if(board[pos[0]][pos[1]] == 0)
+        {
+            // Straight
+            int rowSum = 0;
+            int columnSum = 0;
+            for (int n : board[pos[1]])
+                rowSum += n;
+            for(int n=0; n<board[0].length; n++ )
+                columnSum += board[n][pos[0]];
+
+            if(rowSum > 0 || columnSum > 0) {
+                System.out.println("Colliding with " + (rowSum>0 ? "row" : "column"));
+                return true;
+            }
+        }
+
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if(board[i][j] == 0) {
-                    // Straight
-                    int rowSum = 0;
-                    int columnSum = 0;
-                    for (int n : board[pos[1]])
-                        rowSum += n;
-                    for(int n=0; n<board[0].length; n++ )
-                        columnSum += board[n][pos[0]];
-
-                    if(rowSum > 0 || columnSum > 0) {
-                        System.out.println("Straight: i="+i+",j="+j);
-                        continue;
-                    }
                     boolean shouldContinue = false;
                     
                     // Check diagonal in all four directions
