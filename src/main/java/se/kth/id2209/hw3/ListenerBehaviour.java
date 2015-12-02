@@ -92,7 +92,9 @@ public class ListenerBehaviour extends CyclicBehaviour {
             } else if (agent.isColliding(pos)) {
                 reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                 reply.setOntology(Ontologies.POSITION_COLLIDING);
-            } else {
+                agent.updateMySearchPos();
+            } else { // skicka vidare förfrågan, som else if
+                // else om det är första  queen så ->
                 reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                 reply.setOntology(Ontologies.ACCEPTED_PROPOSAL);
                 agent.addBehaviour(new OneShotBehaviour() {

@@ -16,13 +16,14 @@ public class QueenAgent extends Agent {
     private final int ID = UniqueQueenIdGiver.createUniqueId();
     private final static String DF_TYPE = "Queen";
     private final static int SEARCH_FOR_QUEENAGENTS_DELAY = 3000;
-    AID[] queens = null;
+    AID[] queens = null; // använd ej
     AID predecessor = null;
     int N = 0;
-    int[][] board = null;
+    int[][] board = null; // använd ej
     private Random random = new Random();
-    boolean gotPos = false;
+    boolean gotPos = false; // använd ej
     int[] myPos = null;
+    int mySearchPos = 0; // använd ej
 
     @Override
     public void setup() {
@@ -39,7 +40,8 @@ public class QueenAgent extends Agent {
                 N = queens.length;
                 board = initBoard();
                 if (ID == UniqueQueenIdGiver.FIRST_ID) {
-                    int[] pos = generateRandomPosition();
+//                    int[] pos = generateRandomPosition();
+                    int[] pos = generateNewPosition();
                     board[pos[0]][pos[1]] = ID;
                     gotPos = true;
                     myPos = pos;
@@ -75,6 +77,18 @@ public class QueenAgent extends Agent {
         return new int[]{x, y};
     }
 
+    /**
+     * A way to generate a new position that sticks to a single row per queen.
+     * Requires that mySearchPos is updated everytime a position is colliding
+     */
+
+    int[] generateNewPosition(){
+        int x = mySearchPos;
+        int y = Integer.parseInt(this.getLocalName().substring("Queen".length()));
+
+        return new int[]{x, y};
+    }
+
     private int[][] initBoard() {
         int[][] board = new int[N][N];
         for (int i = 0; i < N; i++) {
@@ -86,6 +100,7 @@ public class QueenAgent extends Agent {
     }
 
     // NOT TESTED
+    // jämför endast med sin egen pos
     boolean isColliding(int[] pos) {
         if(pos == null) {
             System.out.println("Comparing to pos=null");
@@ -108,9 +123,13 @@ public class QueenAgent extends Agent {
                 return true;
             }
         }
+        else
+        {
+            return true;
+        }
 
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
+            for (int j = 0; j < N; j++) { // ta bort
                 if(board[i][j] == 0) {
                     boolean shouldContinue = false;
                     
@@ -136,7 +155,17 @@ public class QueenAgent extends Agent {
         }
         return true;
     }
-    
+
+    void updateMySearchPos()
+    {
+        mySearchPos++;
+        if(mySearchPos >= board[0].length)
+        {
+            mySearchPos = 0;
+        }
+    }
+
+    // ta bort, slumpa nya pos
     int[] getANonCollidingPos() {
         int[] pos = new int[2];
         for (int i = 0; i < N; i++) {
