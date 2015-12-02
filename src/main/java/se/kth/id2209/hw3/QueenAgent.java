@@ -4,6 +4,8 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.WakerBehaviour;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -16,14 +18,11 @@ public class QueenAgent extends Agent {
     private final int ID = UniqueQueenIdGiver.createUniqueId();
     private final static String DF_TYPE = "Queen";
     private final static int SEARCH_FOR_QUEENAGENTS_DELAY = 3000;
-    AID[] queens = null; // använd ej
-    AID predecessor = null;
+    AID predecessor = null, successor = null;
     int N = 0;
-    int[][] board = null; // använd ej
     private Random random = new Random();
-    boolean gotPos = false; // använd ej
     int[] myPos = null;
-    int mySearchPos = 0; // använd ej
+    List<int[]> posList = new ArrayList();
 
     @Override
     public void setup() {
@@ -36,30 +35,38 @@ public class QueenAgent extends Agent {
 
             @Override
             public void onWake() {
-                queens = DFUtilities.searchAllDF(QueenAgent.this, "Queen");
+                AID[] queens = DFUtilities.searchAllDF(QueenAgent.this, "Queen");
                 N = queens.length;
-                board = initBoard();
                 if (ID == UniqueQueenIdGiver.FIRST_ID) {
-//                    int[] pos = generateRandomPosition();
-                    int[] pos = generateNewPosition();
-                    board[pos[0]][pos[1]] = ID;
-                    gotPos = true;
+                    int[] pos = generateRandomPosition();
                     myPos = pos;
-                    printBoard();
-                    int[] cpos = getANonCollidingPos();
-                    System.out.println("CPOS = "+ cpos[0]+","+cpos[1]);
+                    successor = getSuccessor(queens);
+                    System.out.println("ADDING POSITION: "+getLocalName()
+                        +"'s pos = " + pos[0] + ", " + pos[1]);
                 } else {
-                    predecessor = getPredecessor (queens); 
-                    System.out.println(QueenAgent.this.getAID().getLocalName() + " pred="+predecessor.getLocalName());
+                    predecessor = getPredecessor(queens);
+                    successor = getSuccessor(queens);
+                    System.out.println(QueenAgent.this.getAID().getLocalName() + " pred=" + predecessor.getLocalName());
                     addBehaviour(new ProposePositionBehaviour(QueenAgent.this));
                 }
             }
 
-            private AID getPredecessor (AID[] queens) {
-                for(int i=0; i<queens.length; i++) {
+            private AID getPredecessor(AID[] queens) {
+                for (int i = 0; i < queens.length; i++) {
                     int id = Integer.parseInt(
-                        queens[i].getLocalName().substring("Queen".length()));
-                    if(id == QueenAgent.this.ID - 1) {
+                            queens[i].getLocalName().substring("Queen".length()));
+                    if (id == QueenAgent.this.ID - 1) {
+                        return queens[i];
+                    }
+                }
+                return null;
+            }
+            
+            private AID getSuccessor(AID[] queens) {
+                for (int i = 0; i < queens.length; i++) {
+                    int id = Integer.parseInt(
+                            queens[i].getLocalName().substring("Queen".length()));
+                    if (id == QueenAgent.this.ID + 1) {
                         return queens[i];
                     }
                 }
@@ -71,9 +78,9 @@ public class QueenAgent extends Agent {
     }
 
     int[] generateRandomPosition() {
-        int x = random.nextInt(N);
+        int x = getId() - 1;
         int y = random.nextInt(N);
-    
+
         return new int[]{x, y};
     }
 
@@ -81,138 +88,45 @@ public class QueenAgent extends Agent {
      * A way to generate a new position that sticks to a single row per queen.
      * Requires that mySearchPos is updated everytime a position is colliding
      */
-
-    int[] generateNewPosition(){
-        int x = mySearchPos;
-        int y = Integer.parseInt(this.getLocalName().substring("Queen".length()));
+    /*int[] generateNewPosition() {
+        int x = random.nextInt(N-1);
+        int y = random.nextInt(N-1);
 
         return new int[]{x, y};
-    }
-
-    private int[][] initBoard() {
-        int[][] board = new int[N][N];
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                board[i][j] = 0;
-            }
-        }
-        return board;
-    }
+    }*/
 
     // NOT TESTED
     // jämför endast med sin egen pos
     boolean isColliding(int[] pos) {
-        if(pos == null) {
+        if (pos == null) {
             System.out.println("Comparing to pos=null");
             return true;
         }
-        System.out.println("Comparing to pos="+pos[0]+","+pos[1]);
+        System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " STRAIGHT");
 
-        if(board[pos[0]][pos[1]] == 0)
-        {
-            // Straight
-            int rowSum = 0;
-            int columnSum = 0;
-            for (int n : board[pos[1]])
-                rowSum += n;
-            for(int n=0; n<board[0].length; n++ )
-                columnSum += board[n][pos[0]];
-
-            if(rowSum > 0 || columnSum > 0) {
-                System.out.println("Colliding with " + (rowSum>0 ? "row" : "column"));
+        //Straight
+        if (pos[0] == myPos[0] || pos[1] == myPos[1]) {
+            return true;
+        }
+        System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " DIAG");
+       
+        // Check diagonal in all four directions
+        for (int h = 1; h < N - Math.max(myPos[0], myPos[1]); h++) {
+            if (myPos[0] + h == pos[0] && myPos[1] + h == pos[1]) {
+                return true;
+            } else if (myPos[0] - h == pos[0] && myPos[1] - h == pos[1]) {
+                return true;
+            } else if (myPos[0] - h == pos[0] && myPos[1] + h == pos[1]) {
+                return true;
+            } else if (myPos[0] + h == pos[0] && myPos[1] - h == pos[1]) {
                 return true;
             }
         }
-        else
-        {
-            return true;
-        }
-
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) { // ta bort
-                if(board[i][j] == 0) {
-                    boolean shouldContinue = false;
-                    
-                    // Check diagonal in all four directions
-                    for (int h = 1; h < N - Math.max(i, j); h++) {
-                        if(i+h == pos[0] && j+h == pos[1]) {
-                            shouldContinue = true;
-                        } else if(i-h == pos[0] && j-h == pos[1]) {
-                            shouldContinue = true;
-                        } else if(i-h == pos[0] && j+h == pos[1]) {
-                            shouldContinue = true;
-                        } else if(i+h == pos[0] && j-h == pos[1]) {
-                            shouldContinue = true;
-                        }
-                    }
-                    if(shouldContinue) {
-                        System.out.println("isColliding Diagonal: i="+i+",j="+j);
-                        continue;
-                    }
-                    return false;
-                }
-            }
-        }
-        return true;
+        System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " SUCCESS");
+        return false;
     }
 
-    void updateMySearchPos()
-    {
-        mySearchPos++;
-        if(mySearchPos >= board[0].length)
-        {
-            mySearchPos = 0;
-        }
-    }
-
-    // ta bort, slumpa nya pos
-    int[] getANonCollidingPos() {
-        int[] pos = new int[2];
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if(board[i][j] == 0) {
-                    pos[0] = i;
-                    pos[1] = j;
-                    
-                    boolean shouldContinue = false;
-                    
-                    //Check straight left/right & up/down
-                    /*if(i == pos[0] || j == pos[1]) {
-                        System.out.println("getANonCollidingPos Straight: i="+i+",j="+j);
-                        continue;
-                    }*/
-                    
-                    // Check diagonal in all four directions
-                    for (int h = 1; h < N - Math.max(i, j); h++) {
-                        if(i+h == pos[0] && j+h == pos[1]) {
-                            shouldContinue = true;
-                        } else if(i-h == pos[0] && j-h == pos[1]) {
-                            shouldContinue = true;
-                        } else if(i-h == pos[0] && j+h == pos[1]) {
-                            shouldContinue = true;
-                        } else if(i+h == pos[0] && j-h == pos[1]) {
-                            shouldContinue = true;
-                        }
-                    }
-                    if(shouldContinue) {
-                        System.out.println("getNonCollidingPos Diagonal: i="+i+",j="+j);
-                        continue;
-                    }
-                    
-                    return pos;
-                }
-            }
-        }
-        return null;
-    }
-
-    void addPos(int[] pos, AID aid) {
-        board[pos[0]][pos[1]] = Integer.parseInt(
-                aid.getLocalName().substring("Queen".length()));
-        printBoard();
-    }
-    
-    void printBoard() {
+    /*void printBoard() {
         StringBuilder sb = new StringBuilder();
         sb.append("---------------------------------------------");
         sb.append("\n");
@@ -224,5 +138,21 @@ public class QueenAgent extends Agent {
         }
         sb.append("---------------------------------------------");
         System.out.println(sb.toString());
+    }*/
+
+    public int getId() {
+        return Integer.parseInt(getAID().getLocalName().substring("Queen".length()));
+    }
+
+    boolean gotPos() {
+        return myPos != null;
+    }
+
+    AID getPredecessor() {
+        return predecessor;
+    }
+    
+    AID getSuccessor() {
+        return successor;
     }
 }

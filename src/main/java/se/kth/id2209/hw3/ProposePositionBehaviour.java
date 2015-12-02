@@ -3,6 +3,7 @@ package se.kth.id2209.hw3;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,13 +17,20 @@ public class ProposePositionBehaviour extends OneShotBehaviour {
     
     public ProposePositionBehaviour(QueenAgent agent) {
         super(agent);
-        //pos = agent.generateRandomPosition();
-        pos = agent.getANonCollidingPos();
-        if(pos == null) {
-            System.out.println("ProposePositionBehaviour - pos=null");
-        } else {
-            System.out.println("ProposePositionBehaviour - pos="+pos[0]+","+pos[1]);
+        pos = agent.generateRandomPosition();
+        while(contains(agent, pos)) {
+            pos = agent.generateRandomPosition();
         }
+        agent.posList.add(pos);
+    }
+    
+    private boolean contains(QueenAgent agent, int[] pos) {
+        for(int[] p : agent.posList) {
+            if(p[0] == pos[0] && p[1] == pos[1]) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public ProposePositionBehaviour(QueenAgent agent, int[] pos) {
