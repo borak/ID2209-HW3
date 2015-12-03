@@ -8,8 +8,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *  ProposePositionBehaviour is a OneShotBehaviour that picks a spot on the board and proposes
+ *      that to the predecessor of the agent.
  *
- * @author Kim
  */
 public class ProposePositionBehaviour extends OneShotBehaviour {
 
@@ -23,7 +24,7 @@ public class ProposePositionBehaviour extends OneShotBehaviour {
         }
         agent.posList.add(pos);
     }
-    
+
     private boolean contains(QueenAgent agent, int[] pos) {
         for(int[] p : agent.posList) {
             if(p[0] == pos[0] && p[1] == pos[1]) {

@@ -1,7 +1,7 @@
 package se.kth.id2209.hw3;
 
 /**
- *
+ * Gives each Queen a unique ID
  * @author Kim
  */
 class UniqueQueenIdGiver {

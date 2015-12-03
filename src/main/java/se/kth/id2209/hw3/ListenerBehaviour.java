@@ -13,8 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The ListenerBehaviour handles the communication between Queens.
+ * It recieves and forwards position proposals, rejections, accepts etc
  *
- * @author Kim
  */
 public class ListenerBehaviour extends CyclicBehaviour {
 
@@ -152,6 +153,10 @@ public class ListenerBehaviour extends CyclicBehaviour {
         }
     }
 
+    /**
+     * Used to send a proposed position to the predecessor of the current agent
+     *
+     */
     private void forwardMsg(ACLMessage msg, AID receiver) {
         //System.out.println(myAgent.getLocalName() + " is FORWARDING to " + receiver.getLocalName());
         ACLMessage forwardMsg = new ACLMessage(msg.getPerformative());

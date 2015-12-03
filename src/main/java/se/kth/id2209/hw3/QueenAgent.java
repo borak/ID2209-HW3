@@ -78,6 +78,10 @@ public class QueenAgent extends Agent {
         addBehaviour(seq);
     }
 
+    /**
+     * Generates a random position in the row (column?) of the Queen.
+     * @return A new {x,y} coordinate within the board
+     */
     int[] generateRandomPosition() {
         int x = getId() - 1;
         int y = random.nextInt(N);
@@ -96,6 +100,12 @@ public class QueenAgent extends Agent {
         return new int[]{x, y};
     }*/
 
+
+    /**
+     * Checks if the argument position collides with the current Quen
+     * @param pos The x and y coordinates to check
+     * @return True if there is a collistion, false if there is no collision
+     */
     // NOT TESTED
     // jämför endast med sin egen pos
     boolean isColliding(int[] pos) {
