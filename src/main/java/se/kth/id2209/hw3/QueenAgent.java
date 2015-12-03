@@ -43,6 +43,7 @@ public class QueenAgent extends Agent {
                     successor = getSuccessor(queens);
                     System.out.println("ADDING POSITION: "+getLocalName()
                         +"'s pos = " + pos[0] + ", " + pos[1]);
+                    BoardPrinter.posList.add(pos);
                 } else {
                     predecessor = getPredecessor(queens);
                     successor = getSuccessor(queens);
@@ -102,13 +103,13 @@ public class QueenAgent extends Agent {
             System.out.println("Comparing to pos=null");
             return true;
         }
-        System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " STRAIGHT");
+        //System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " STRAIGHT");
 
         //Straight
         if (pos[0] == myPos[0] || pos[1] == myPos[1]) {
             return true;
         }
-        System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " DIAG");
+        //System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " DIAG");
        
         // Check diagonal in all four directions
         for (int h = 1; h < N - Math.max(myPos[0], myPos[1]); h++) {
@@ -122,7 +123,7 @@ public class QueenAgent extends Agent {
                 return true;
             }
         }
-        System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " SUCCESS");
+        //System.out.println("Comparing to pos=" + pos[0] + "," + pos[1] + " SUCCESS");
         return false;
     }
 

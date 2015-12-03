@@ -58,6 +58,9 @@ public class ListenerBehaviour extends CyclicBehaviour {
             agent.myPos = pos;
             System.out.println("ADDING POSITION: " + agent.getLocalName()
                     + "'s pos = " + pos[0] + ", " + pos[1]);
+            BoardPrinter.N = agent.N;
+            BoardPrinter.posList.add(pos);
+            BoardPrinter.printBoard();
         } else if (msg.getOntology().equalsIgnoreCase(Ontologies.PROPOSE_POSITION)) {
             int[] pos = null;
             try {
@@ -90,9 +93,9 @@ public class ListenerBehaviour extends CyclicBehaviour {
                 reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                 reply.setOntology(Ontologies.ACCEPTED_PROPOSAL);
                 reply.addReceiver(agent.getSuccessor());
-                System.out.println(agent.getSuccessor().getLocalName()
-                        + "' is getting a proposal that was accepted by "
-                        + agent.getLocalName());
+                //System.out.println(agent.getSuccessor().getLocalName()
+                //        + "' is getting a proposal that was accepted by "
+                //        + agent.getLocalName());
                 /*agent.addBehaviour(new OneShotBehaviour() {
 
                  @Override
@@ -150,7 +153,7 @@ public class ListenerBehaviour extends CyclicBehaviour {
     }
 
     private void forwardMsg(ACLMessage msg, AID receiver) {
-        System.out.println(myAgent.getLocalName() + " is FORWARDING to " + receiver.getLocalName());
+        //System.out.println(myAgent.getLocalName() + " is FORWARDING to " + receiver.getLocalName());
         ACLMessage forwardMsg = new ACLMessage(msg.getPerformative());
         forwardMsg.setOntology(msg.getOntology());
         try {
@@ -158,8 +161,8 @@ public class ListenerBehaviour extends CyclicBehaviour {
         } catch (UnreadableException | IOException ex) {
             Logger.getLogger(ListenerBehaviour.class.getName()).log(Level.SEVERE, null, ex);
         }
-        msg.addReceiver(receiver);
-        myAgent.send(msg);
+        forwardMsg.addReceiver(receiver);
+        myAgent.send(forwardMsg);
     }
 
     /*private void handleAccept(QueenAgent agent, ACLMessage msg) {
