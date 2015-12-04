@@ -8,18 +8,18 @@ import java.util.List;
  * @author Kim
  */
 public class BoardPrinter {
-    static List<int[]> posList = new ArrayList();
+    static List<Pos> posList = new ArrayList();
     static int N; 
     
-    static void printBoard() {
+    synchronized static void printBoard() {
         StringBuilder sb = new StringBuilder();
         sb.append("---------------------------------------------");
         sb.append("\n");
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 boolean gotMatch = false;
-                for(int[] pos : posList) {
-                    if(pos[0] == i && pos[1] == j) {
+                for(Pos pos : posList) {
+                    if(pos.x == i && pos.y == j) {
                         sb.append("X");
                         gotMatch = true;
                         break;

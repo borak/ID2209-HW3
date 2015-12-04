@@ -14,27 +14,18 @@ import java.util.logging.Logger;
  */
 public class ProposePositionBehaviour extends OneShotBehaviour {
 
-    private int[] pos = null;
+    private Pos pos = null;
     
     public ProposePositionBehaviour(QueenAgent agent) {
         super(agent);
         pos = agent.generateRandomPosition();
-        while(contains(agent, pos)) {
+        while(agent.containsPos(pos.y)) {
             pos = agent.generateRandomPosition();
         }
-        agent.posList.add(pos);
-    }
-
-    private boolean contains(QueenAgent agent, int[] pos) {
-        for(int[] p : agent.posList) {
-            if(p[0] == pos[0] && p[1] == pos[1]) {
-                return true;
-            }
-        }
-        return false;
+        agent.addPos(pos.y);
     }
     
-    public ProposePositionBehaviour(QueenAgent agent, int[] pos) {
+    public ProposePositionBehaviour(QueenAgent agent, Pos pos) {
         super(agent);
         this.pos = pos;
     }
