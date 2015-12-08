@@ -93,14 +93,12 @@ public class ListenerBehaviour extends CyclicBehaviour {
             } 
             agent.addBehaviour(new ProposePositionBehaviour(agent));
         } else {
-            //System.out.println(agent.getLocalName() + "STOPS SENDING");
             block();
         }
     }
 
     /**
      * Used to send a proposed position to the predecessor of the current agent
-     *
      */
     private void forwardMsg(ACLMessage msg, AID receiver) {
         ACLMessage forwardMsg = new ACLMessage(msg.getPerformative());

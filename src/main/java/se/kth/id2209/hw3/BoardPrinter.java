@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * A shared memory board printer only for visualisation and not for actual
+ * board representation. Used mostly for visualisation during development.
  * @author Kim
  */
 public class BoardPrinter {

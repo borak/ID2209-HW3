@@ -9,18 +9,19 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * The queen agent represents a queen as a chess piece. The queens will 
- * cooperate with eachother to achieve a possible solution to having N Queens 
- * on a NxN board. 
- * 
- * It moves on a board either straight or diagonal. This solution is made 
- * efficient by only allowing the agent to be randomized by one axel. 
- * 
+ * The queen agent represents a queen as a chess piece. The queens will
+ * cooperate with eachother to achieve a possible solution to having N Queens on
+ * a NxN board.
+ *
+ * It moves on a board either straight or diagonal. This solution is made
+ * efficient by only allowing the agent to be randomized by one axel.
+ *
  * (ID - 1, random 0 -> N-1), N is the number of queens.
- * 
+ *
  * @author Kim
  */
 public class QueenAgent extends Agent {
+
     private final int ID = UniqueQueenIdGiver.createUniqueId();
     private final static String DF_TYPE = "Queen";
     private final static int SEARCH_FOR_QUEENAGENTS_DELAY = 3000;
@@ -30,33 +31,73 @@ public class QueenAgent extends Agent {
     private Pos myPos = null;
     private final List<Integer> posList = new ArrayList();
     private final Object posLock = new Object();
+    private final Object myposLock = new Object();
 
     void addPos(int y) {
-        synchronized(posLock) {
-            if(!posList.contains(y)) {
+        synchronized (posLock) {
+            if (!posList.contains(y)) {
                 posList.add(y);
             }
-            System.out.println("COLLIDED WITH " + (getId()-1) + ", " + y);
+            System.out.println("COLLIDED WITH " + (getId() - 1) + ", " + y);
         }
     }
-    
+
     boolean containsPos(int y) {
-        synchronized(posLock) {
+        synchronized (posLock) {
             return posList.contains(y);
         }
     }
-    
+
     List<Integer> getPosList() {
-        synchronized(posLock) {
+        synchronized (posLock) {
             return new ArrayList(posList);
         }
-        
+
     }
-    
+
     /**
-     * Registers itself on the DFService.
-     * (1) Searches for other queen agents and proposes a position.
-     * (2) Starts listening for messages.
+     * Method for testing certain collision situations.
+     */
+    private void test() {
+        if (ID != 1) {
+            return;
+        }
+
+        Pos pos = new Pos(3, 3);
+
+        myPos = new Pos(0, 4);
+        System.out.println("0,4 && 3,3 collides? : " + isColliding(pos));
+
+        myPos = new Pos(1, 2);
+        System.out.println("1,2 && 3,3 collides? : " + isColliding(pos));
+
+        myPos = new Pos(2, 0);
+        System.out.println("2,0 && 3,3 collides? : " + isColliding(pos));
+    }
+
+    /**
+     * Method for testing different predetermined scenarios.
+     */
+    private void testPos() {
+        switch (ID) {
+            case 1:
+                setPos(new Pos(0, 4));
+                break;
+            case 2:
+                setPos(new Pos(1, 2));
+                break;
+            case 3:
+                setPos(new Pos(2, 0));
+                break;
+            case 4:
+                setPos(new Pos(3, 3));
+                break;
+        }
+    }
+
+    /**
+     * Registers itself on the DFService. (1) Searches for other queen agents
+     * and proposes a position. (2) Starts listening for messages.
      */
     @Override
     public void setup() {
@@ -76,19 +117,19 @@ public class QueenAgent extends Agent {
                     Pos pos = generateRandomPosition();
                     setPos(pos);
                     successor = getSuccessor(queens);
-                    System.out.println(QueenAgent.this.getAID().getLocalName() 
+                    System.out.println(QueenAgent.this.getAID().getLocalName()
                             + " pred=null"
                             + " succ=" + successor.getLocalName());
                 } else {
                     predecessor = getPredecessor(queens);
                     successor = getSuccessor(queens);
                     String sname;
-                    if(successor == null) {
+                    if (successor == null) {
                         sname = "null";
                     } else {
                         sname = successor.getLocalName();
                     }
-                    System.out.println(QueenAgent.this.getAID().getLocalName() 
+                    System.out.println(QueenAgent.this.getAID().getLocalName()
                             + " pred=" + predecessor.getLocalName()
                             + " succ=" + sname);
                     addBehaviour(new ProposePositionBehaviour(QueenAgent.this));
@@ -104,7 +145,7 @@ public class QueenAgent extends Agent {
                 }
                 return null;
             }
-            
+
             private AID getSuccessor(AID[] queens) {
                 for (AID queen : queens) {
                     int id = Integer.parseInt(queen.getLocalName().substring("Queen".length()));
@@ -121,18 +162,20 @@ public class QueenAgent extends Agent {
 
     /**
      * Generates a random position in the row (column?) of the Queen.
+     *
      * @return A new {x,y} coordinate within the board
      */
     Pos generateRandomPosition() {
         Pos pos = new Pos();
         pos.x = getId() - 1;
         pos.y = random.nextInt(N);
-        
+
         return pos;
     }
 
     /**
      * Checks if the argument position collides with the current Quen
+     *
      * @param pos The x and y coordinates to check
      * @return True if there is a collistion, false if there is no collision
      */
@@ -140,25 +183,27 @@ public class QueenAgent extends Agent {
         if (pos == null) {
             System.err.println("Comparing to pos=null");
             return true;
-        } 
-        
-        if (pos.x == myPos.x || pos.y == myPos.y) {
-            return true;
         }
-        
-        for (int h = 1; h < N; h++) {
-            if (myPos.x + h == pos.x && myPos.y + h == pos.y) {
+
+        synchronized (myposLock) {
+            if (pos.x == myPos.x || pos.y == myPos.y) {
                 return true;
-            } else if (myPos.x - h == pos.x && myPos.y - h == pos.y) {
-                return true;
-            } else if (myPos.x - h == pos.x && myPos.y + h == pos.y) {
-                return true;
-            } else if (myPos.x + h == pos.x && myPos.y - h == pos.y) {
-                return true;
-            } 
+            }
+
+            for (int h = 1; h < N; h++) {
+                if (myPos.x + h == pos.x && myPos.y + h == pos.y) {
+                    return true;
+                } else if (myPos.x - h == pos.x && myPos.y - h == pos.y) {
+                    return true;
+                } else if (myPos.x - h == pos.x && myPos.y + h == pos.y) {
+                    return true;
+                } else if (myPos.x + h == pos.x && myPos.y - h == pos.y) {
+                    return true;
+                }
+            }
+
+            return false;
         }
-        
-        return false;
     }
 
     public int getId() {
@@ -166,26 +211,32 @@ public class QueenAgent extends Agent {
     }
 
     boolean gotPos() {
-        return myPos != null;
+        synchronized (posLock) {
+            return myPos != null;
+        }
     }
-    
+
     synchronized void setPos(Pos pos) {
-        myPos = pos;
-        System.out.println("ADDING POSITION: " + getLocalName()
-                + "'s pos = " + pos.x + ", " + pos.y);
-        BoardPrinter.posList.add(pos);
-        BoardPrinter.printBoard();
+        synchronized (posLock) {
+            myPos = pos;
+            System.out.println("ADDING POSITION: " + getLocalName()
+                    + "'s pos = " + pos.x + ", " + pos.y);
+            BoardPrinter.posList.add(pos);
+            BoardPrinter.printBoard();
+        }
     }
 
     AID getPredecessor() {
         return predecessor;
     }
-    
+
     AID getSuccessor() {
         return successor;
     }
 
     Pos getPos() {
-        return myPos;
+        synchronized (posLock) {
+            return myPos;
+        }
     }
 }
